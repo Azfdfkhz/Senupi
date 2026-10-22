@@ -28,9 +28,20 @@ Jangan pernah menaruh bot token di `messages.js`, `script.js`, atau kode fronten
 
 Untuk grup: tambahkan bot ke grup, kirim pesan di grup, lalu periksa `getUpdates` untuk ID grup. Pastikan bot memiliki izin yang diperlukan.
 
-## Hosting
+## Deploy ke Vercel
 
-Hosting statis saja (misalnya GitHub Pages) tidak bisa menjalankan `server.js`. Deploy seluruh proyek ke hosting yang mendukung Node.js, atau deploy endpoint serverless terpisah. Atur dua environment variables Telegram pada dashboard hosting, jangan commit `.env` ke Git.
+Vercel tidak menjalankan `server.js`; form memakai fungsi serverless `api/message.js` (logika yang sama ada di `lib/message-core.js`).
+
+1. Upload proyek ke GitHub (tanpa `.env`) lalu import di Vercel. Framework preset: **Other**, tanpa build command.
+2. Di **Project Settings → Environment Variables**, tambahkan `TELEGRAM_BOT_TOKEN` dan `TELEGRAM_CHAT_ID` (centang Production, Preview, Development).
+3. **Redeploy** setelah menambah variabel (variabel baru tidak berlaku untuk deployment lama).
+4. Cek log di tab **Functions/Logs** jika pesan gagal terkirim.
+
+Catatan: rate limit di Vercel bersifat sederhana (per instance fungsi). Untuk trafik besar, gunakan Vercel Firewall/WAF atau CAPTCHA.
+
+## Hosting lain
+
+GitHub Pages saja tidak bisa menjalankan backend. Gunakan Vercel (di atas) atau hosting Node.js yang menjalankan `npm start`; atur dua environment variables Telegram di dashboard, jangan commit `.env`.
 
 ## Keamanan dan batasan
 

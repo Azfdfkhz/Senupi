@@ -15,12 +15,8 @@ try {
 
 const PORT = Number(process.env.PORT || 8000);
 const ROOT = __dirname;
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const MAX_BODY = 12_000;
-const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 5;
-const recentRequests = new Map();
+const { processMessage } = require("./lib/message-core");
 // Set TRUST_PROXY=true jika di belakang proxy/hosting (Nginx, Cloudflare, Render, dll.)
 // agar rate limit memakai IP pengunjung asli, bukan IP proxy.
 const TRUST_PROXY = process.env.TRUST_PROXY === "true";
@@ -28,6 +24,14 @@ const TRUST_PROXY = process.env.TRUST_PROXY === "true";
 // Hanya file ini yang boleh diakses publik. File lain (.env, server.js, package.json, dll.) tidak pernah disajikan.
 const PUBLIC_FILES = new Set(["index.html", "style.css", "script.js", "messages.js", "visitor-message.js"]);
 const PUBLIC_DIRS = ["assets"];
+
+function getClientKey(req) {
+  if (TRUST_PROXY) {
+    const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+    if (forwarded) return forwarded;
+  }
+  return req.socket.remoteAddress || "unknown";
+}
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -71,61 +75,6 @@ function readJson(req) {
   });
 }
 
-function getClientKey(req) {
-  if (TRUST_PROXY) {
-    const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
-    if (forwarded) return forwarded;
-  }
-  return req.socket.remoteAddress || "unknown";
-}
-
-function rateLimit(req) {
-  const key = getClientKey(req);
-  const now = Date.now();
-  // Bersihkan entri lama supaya Map tidak membesar tanpa batas.
-  if (recentRequests.size > 5000) {
-    for (const [k, v] of recentRequests) if (now - v.start >= WINDOW_MS) recentRequests.delete(k);
-  }
-  const current = recentRequests.get(key);
-  if (!current || now - current.start >= WINDOW_MS) {
-    recentRequests.set(key, { start: now, count: 1 });
-    return false;
-  }
-  current.count += 1;
-  return current.count > MAX_PER_WINDOW;
-}
-
-async function sendToTelegram(name, message) {
-  if (!BOT_TOKEN || !CHAT_ID) {
-    throw new Error("Server belum dikonfigurasi dengan Telegram Bot Token dan Chat ID.");
-  }
-  const text = [
-    "🌷 Pesan baru dari Snoopy Message Garden",
-    "",
-    `Nama: ${name.replace(/[\r\n]+/g, " ") || "Anonim"}`,
-    "",
-    message,
-    "",
-    `Waktu: ${new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}`
-  ].join("\n");
-
-  const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: CHAT_ID,
-      text,
-      disable_web_page_preview: true
-    }),
-    signal: AbortSignal.timeout(10_000)
-  });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok || !result.ok) {
-    console.error("Telegram API rejected message:", result.description || response.status);
-    throw new Error("Telegram belum bisa menerima pesan saat ini.");
-  }
-}
-
 const server = http.createServer((req, res) => {
   handleRequest(req, res).catch(error => {
     console.error("Unhandled request error:", error.message);
@@ -142,10 +91,6 @@ async function handleRequest(req, res) {
       res.setHeader("Allow", "POST");
       return sendJson(res, 405, { error: "Metode tidak diizinkan." });
     }
-    if (rateLimit(req)) {
-      return sendJson(res, 429, { error: "Terlalu banyak pesan. Tunggu sebentar lalu coba lagi." });
-    }
-
     let data;
     try {
       data = await readJson(req);
@@ -154,25 +99,8 @@ async function handleRequest(req, res) {
         error: error.message === "BODY_TOO_LARGE" ? "Ukuran pesan terlalu besar." : "Format pesan tidak valid."
       });
     }
-
-    // Honeypot field: silently accept automated spam without forwarding it.
-    if (typeof data.website === "string" && data.website.trim()) {
-      return sendJson(res, 200, { ok: true });
-    }
-
-    const name = typeof data.name === "string" ? data.name.trim().slice(0, 50) : "";
-    const message = typeof data.message === "string" ? data.message.trim() : "";
-    if (message.length < 2 || message.length > 1000) {
-      return sendJson(res, 400, { error: "Pesan harus berisi 2–1000 karakter." });
-    }
-
-    try {
-      await sendToTelegram(name, message);
-      return sendJson(res, 200, { ok: true });
-    } catch (error) {
-      console.error(error.message);
-      return sendJson(res, 502, { error: "Pesan gagal dikirim. Coba lagi beberapa saat." });
-    }
+    const { status, body } = await processMessage(data, getClientKey(req));
+    return sendJson(res, status, body);
   }
 
   if (req.method !== "GET" && req.method !== "HEAD") {
@@ -212,7 +140,7 @@ async function handleRequest(req, res) {
 
 server.listen(PORT, () => {
   console.log(`Snoopy Message Garden berjalan di http://localhost:${PORT}`);
-  if (!BOT_TOKEN || !CHAT_ID) {
+  if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
     console.warn("Telegram belum dikonfigurasi. Isi TELEGRAM_BOT_TOKEN dan TELEGRAM_CHAT_ID.");
   }
 });
