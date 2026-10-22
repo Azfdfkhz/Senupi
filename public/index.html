@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#bde7ff">
+  <title>Snoopy Message Garden</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app" id="app">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Snoopy Message Garden, beranda">
+        <span class="brand-mark" aria-hidden="true">✿</span>
+        <span>Snoopy <b>Message Garden</b></span>
+      </a>
+      <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="true">
+        <span id="soundIcon" aria-hidden="true">♫</span><span id="soundLabel">Suara aktif</span>
+      </button>
+    </header>
+
+    <section class="scene" aria-label="Taman tempat Snoopy menyampaikan pesan">
+      <div class="sun" aria-hidden="true"></div>
+      <div class="cloud cloud-one" aria-hidden="true"></div>
+      <div class="cloud cloud-two" aria-hidden="true"></div>
+      <div class="distant-hills" aria-hidden="true"></div>
+      <div class="tree tree-left" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="tree tree-right" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="bench" aria-hidden="true"><span></span><span></span><i></i><i></i></div>
+      <div class="flowers flowers-left" aria-hidden="true">✿　✾　✿</div>
+      <div class="flowers flowers-right" aria-hidden="true">✾　✿　✾</div>
+
+      <div class="scene-heading">
+        <span class="eyebrow">A LITTLE NOTE FOR YOU</span>
+        <h1>Seseorang punya<br><em>pesan kecil.</em></h1>
+        <p>Dan Snoopy dengan senang hati akan menyampaikannya.</p>
+      </div>
+
+      <div class="message-bubble" id="messageBubble" role="status" aria-live="polite">
+        <span class="bubble-sparkle" aria-hidden="true">✦</span>
+        <p id="messageText">Hai! Temani aku sebentar, yuk.</p>
+      </div>
+
+      <div class="snoopy-stage" id="snoopyStage" data-animation="idle" aria-label="Snoopy">
+        <div class="shadow"></div>
+        <div class="snoopy" id="snoopy" role="img" aria-label="Ilustrasi Snoopy bergaya kartun">
+          <div class="tail"></div>
+          <div class="body"></div>
+          <div class="collar"></div>
+          <div class="head">
+            <div class="ear"></div>
+            <div class="muzzle"></div>
+            <div class="eye"></div>
+            <div class="nose"></div>
+            <div class="mouth"></div>
+          </div>
+          <div class="arm arm-back"></div>
+          <div class="arm arm-front"></div>
+          <div class="leg leg-back"></div>
+          <div class="leg leg-front"></div>
+        </div>
+        <div class="snoopy-caption" id="snoopyCaption">Snoopy</div>
+      </div>
+
+      <div class="ground" aria-hidden="true"></div>
+      <div class="path" aria-hidden="true"></div>
+      <div class="sparkles" id="sparkles" aria-hidden="true"></div>
+    </section>
+
+    <section class="controls" aria-label="Kontrol cerita">
+      <div class="progress-wrap">
+        <div class="progress-copy"><span id="sceneLabel">Adegan 1 dari 6</span><span id="progressPercent">17%</span></div>
+        <div class="progress-track"><span id="progressBar"></span></div>
+      </div>
+      <div class="control-row">
+        <button class="secondary-btn" id="restartBtn" type="button"><span aria-hidden="true">↺</span> Ulangi</button>
+        <button class="primary-btn" id="nextBtn" type="button">Lanjutkan <span aria-hidden="true">→</span></button>
+      </div>
+      <p class="hint" id="hint">Tekan “Lanjutkan” untuk mengikuti cerita.</p>
+    </section>
+
+
+    <section class="visitor-note" aria-labelledby="visitorTitle">
+      <div class="visitor-note-copy">
+        <span class="eyebrow">YOUR TURN</span>
+        <h2 id="visitorTitle">Sekarang giliran kamu ✿</h2>
+        <p>Tinggalkan pesan untuk Snoopy. Pesanmu akan dikirim ke kotak masuk Telegram pemilik website.</p>
+      </div>
+      <form id="visitorMessageForm" class="visitor-form">
+        <label for="visitorName">Nama panggilan <span>(opsional)</span></label>
+        <input id="visitorName" name="name" type="text" maxlength="50" placeholder="Mau dipanggil siapa?" autocomplete="nickname">
+        <label for="visitorMessage">Pesan untuk Snoopy</label>
+        <textarea id="visitorMessage" name="message" rows="4" maxlength="1000" required placeholder="Tulis pesanmu di sini..."></textarea>
+        <div class="form-meta"><span>Jangan masukkan kata sandi atau informasi pribadi sensitif.</span><span id="charCount">0/1000</span></div>
+        <input class="website-field" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="primary-btn submit-note" type="submit" id="sendMessageBtn">Kirim ke Snoopy <span aria-hidden="true">↗</span></button>
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <footer><span>Dibuat dengan sedikit bunga dan banyak perasaan.</span><span>✿</span></footer>
+  </main>
+  <script src="messages.js"></script>
+  <script src="script.js"></script>
+  <script src="visitor-message.js"></script>
+</body>
+</html>

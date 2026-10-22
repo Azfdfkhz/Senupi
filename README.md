@@ -8,7 +8,7 @@ Memerlukan Node.js 18 atau lebih baru (tidak perlu `npm install`).
 
 1. Ekstrak proyek.
 2. Buat file `.env` dengan menyalin `.env.example`, lalu isi konfigurasi Telegram.
-3. Jalankan server. File `.env` dibaca otomatis oleh `server.js` (atau pakai environment variables):
+3. Jalankan server. File `.env` dibaca otomatis oleh `dev-server.js` (atau pakai environment variables):
    ```bash
    npm start
    ```
@@ -30,9 +30,9 @@ Untuk grup: tambahkan bot ke grup, kirim pesan di grup, lalu periksa `getUpdates
 
 ## Deploy ke Vercel
 
-Vercel tidak menjalankan `server.js`; form memakai fungsi serverless `api/message.js` (logika yang sama ada di `lib/message-core.js`).
+Struktur: file website ada di `public/`, backend serverless di `api/` dan `lib/`. `dev-server.js` hanya untuk menjalankan lokal. Vercel tidak menjalankan `dev-server.js`; form memakai fungsi serverless `api/message.js` (logika yang sama ada di `lib/message-core.js`).
 
-1. Upload proyek ke GitHub (tanpa `.env`) lalu import di Vercel. Framework preset: **Other**, tanpa build command.
+1. Upload proyek ke GitHub (tanpa `.env`) lalu import di Vercel. Framework preset: **Other**, tanpa build command, Root Directory dikosongkan (root repo).
 2. Di **Project Settings → Environment Variables**, tambahkan `TELEGRAM_BOT_TOKEN` dan `TELEGRAM_CHAT_ID` (centang Production, Preview, Development).
 3. **Redeploy** setelah menambah variabel (variabel baru tidak berlaku untuk deployment lama).
 4. Cek log di tab **Functions/Logs** jika pesan gagal terkirim.
@@ -45,7 +45,7 @@ GitHub Pages saja tidak bisa menjalankan backend. Gunakan Vercel (di atas) atau 
 
 ## Keamanan dan batasan
 
-- Server hanya menyajikan file publik (`index.html`, `style.css`, `script.js`, `messages.js`, `visitor-message.js`, dan folder `assets/`). `.env`, `server.js`, dll. tidak bisa diunduh lewat browser.
+- Server hanya menyajikan file publik (isi folder `public/`). `.env`, `dev-server.js`, dll. tidak bisa diunduh lewat browser.
 - Jika di-deploy di belakang proxy/hosting, set `TRUST_PROXY=true` agar rate limit memakai IP pengunjung asli.
 - Bot token tidak pernah dikirim ke browser.
 - Validasi pesan 2–1000 karakter, honeypot, dan rate limit sederhana di backend.
