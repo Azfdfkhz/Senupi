@@ -14,6 +14,8 @@ Memerlukan Node.js 18 atau lebih baru (tidak perlu `npm install`).
    ```
 4. Buka `http://localhost:8000`.
 
+Jika pesan tidak terkirim saat dijalankan lokal, jalankan `npm run check`. Perintah ini memeriksa versi Node, file `.env`, token, koneksi ke Telegram, dan chat ID, lalu mengirim pesan percobaan serta menjelaskan apa yang salah. Pesan error lengkap juga tampil di terminal tempat `npm start` berjalan. Buka website lewat `http://localhost:8000` (bukan dengan klik dua kali `index.html`).
+
 Jangan pernah menaruh bot token di `messages.js`, `script.js`, atau kode frontend. Token hanya boleh berada di environment server.
 
 ## Menghubungkan bot Telegram

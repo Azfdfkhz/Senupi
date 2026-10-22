@@ -4,7 +4,9 @@
   "private": true,
   "description": "A cute interactive message garden with Telegram message forwarding",
   "scripts": {
-    "start": "node dev-server.js"
+    "start": "node dev-server.js",
+    "check": "node check.js",
+    "dev": "node dev-server.js"
   },
   "engines": {
     "node": ">=18"
